@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.andro.indie.school.myretrofitapp.R;
 import com.andro.indie.school.myretrofitapp.network.NetworkService;
 import com.andro.indie.school.myretrofitapp.network.RestService;
+import com.andro.indie.school.myretrofitapp.network.interceptor.TokenAuth;
 import com.andro.indie.school.myretrofitapp.network.response.CityListResponse;
 import com.andro.indie.school.myretrofitapp.ui.adapter.MyRecyclerAdapter;
 
@@ -37,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
 //    private String fakeResponse;
 //    private FakeInterceptor fakeInterceptor;
 
+    private TokenAuth tokenAuth;
+
+    private final String token = "This is my token";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
 
 //        fakeInterceptor = new FakeInterceptor(FAKE_CODE, fakeResponse);
 
+        tokenAuth = new TokenAuth(token);
+
         initRestComponent();
         loadData();
 
@@ -61,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
         okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(httpLoggingInterceptor)
+                .authenticator(tokenAuth)
 //                .addInterceptor(fakeInterceptor)  // Use this to intercept and create 401 exception
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
@@ -80,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadData() {
-        restService.getAllCity(new RestService.MyCallback() {
+        restService.getAllCity(token, new RestService.MyCallback() {
             @Override
             public void onSuccess(CityListResponse response) {
                 adapter.updateCityList(response.getData());
